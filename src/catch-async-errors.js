@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-
 export const catchAsyncErrors = fn =>
   async (req, res, next) => {
     try {

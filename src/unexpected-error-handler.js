@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-
 import createLogger from '@rplan/logger'
 
 const logger = createLogger('express-middleware')

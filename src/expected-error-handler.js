@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-
 import * as HttpStatus from 'http-status-codes'
 import createLogger from '@rplan/logger'
 
