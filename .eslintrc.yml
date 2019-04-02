@@ -1,0 +1,17 @@
+root: true
+extends:
+  - actano-base
+
+parser: babel-eslint
+
+rules:
+  import/no-extraneous-dependencies:
+    - error
+    - devDependencies:
+        - 'test/**/*.js'
+
+overrides:
+  - files:
+      - 'test/**/*.js'
+    env:
+      mocha: true

@@ -1,0 +1,44 @@
+{
+  "name": "@rplan/express-middleware",
+  "version": "0.0.1",
+  "author": "Actano GmbH (https://rplan.com/)",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "src/index.js",
+  "engines": {
+    "node": ">=8"
+  },
+  "scripts": {
+    "build": "babel --out-dir lib src",
+    "ci": "npm run lint && npm run test",
+    "clean": "npm run clean:lib",
+    "clean:lib": "rm -rf lib",
+    "lint": "eslint src",
+    "prepublishOnly": "npm run clean && npm run ci && npm run build",
+    "test": "mocha test"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^10.0.1",
+    "babel-plugin-add-module-exports": "^1.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "chai": "^4.2.0",
+    "eslint": "^5.16.0",
+    "eslint-config-actano-base": "^4.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "mocha": "^6.0.2"
+  },
+  "dependencies": {
+    "@rplan/logger": "^1.1.0",
+    "http-status-codes": "^1.3.2"
+  }
+}

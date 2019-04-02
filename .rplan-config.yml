@@ -1,0 +1,2 @@
+logging:
+  root_logger_name: rplan-express-middleware
