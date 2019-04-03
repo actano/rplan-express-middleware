@@ -2,6 +2,7 @@ import * as HttpStatus from 'http-status-codes'
 import createLogger from '@rplan/logger'
 
 import {
+  BadRequestError,
   ConflictError,
   ForbiddenError,
   NotFoundError,
@@ -10,32 +11,46 @@ import {
 
 const logger = createLogger('express-middleware')
 
-export const expectedErrorHandler = (err, req, res, next) => {
+const errorRegistry = new Map()
+
+const registerError = (errorClass, httpStatusCode) => {
+  errorRegistry.set(errorClass.name, {
+    errorClass,
+    httpStatusCode,
+  })
+}
+
+const registerStandardErrors = () => {
+  registerError(BadRequestError, HttpStatus.BAD_REQUEST)
+  registerError(ConflictError, HttpStatus.CONFLICT)
+  registerError(ForbiddenError, HttpStatus.FORBIDDEN)
+  registerError(NotFoundError, HttpStatus.NOT_FOUND)
+  registerError(UnauthorizedError, HttpStatus.UNAUTHORIZED)
+}
+
+registerStandardErrors()
+
+const expectedErrorHandler = (err, req, res, next) => {
   if (res && res.headersSent) {
     next()
     return
   }
 
-  let isExpectedError = false
-  if (err instanceof NotFoundError) {
-    isExpectedError = true
-    res.status(HttpStatus.NOT_FOUND).json({ message: err.message })
-  } else if (err instanceof ConflictError) {
-    isExpectedError = true
-    res.status(HttpStatus.CONFLICT).json({ message: err.message })
-  } else if (err instanceof ForbiddenError) {
-    isExpectedError = true
-    res.status(HttpStatus.FORBIDDEN).json({ message: err.message })
-  } else if (err instanceof UnauthorizedError) {
-    isExpectedError = true
-    res.status(HttpStatus.UNAUTHORIZED).json({ message: err.message })
-  }
+  for (const errorEntry of errorRegistry.values()) {
+    if (err instanceof errorEntry.errorClass) {
+      logger.debug({ err }, `handled expected error: ${err.name}`)
 
-  if (isExpectedError) {
-    logger.debug({ err }, `handled expected error: ${err.name}`)
-    next()
-    return
+      res.status(errorEntry.httpStatusCode).json({ message: err.message })
+
+      next()
+      return
+    }
   }
 
   next(err)
+}
+
+export {
+  expectedErrorHandler,
+  registerError,
 }
