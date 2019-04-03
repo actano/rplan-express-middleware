@@ -1,3 +1,4 @@
+import * as HttpStatus from 'http-status-codes'
 import createLogger from '@rplan/logger'
 
 const logger = createLogger('express-middleware')
@@ -10,6 +11,6 @@ export const unexpectedErrorHandler = (err, req, res, next) => {
     return
   }
 
-  res.sendStatus(500)
+  res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   next()
 }
