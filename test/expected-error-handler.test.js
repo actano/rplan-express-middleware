@@ -7,8 +7,10 @@ import {
   BadRequestError,
   catchAsyncErrors,
   ConflictError,
-  expectedErrorHandler, ForbiddenError,
+  expectedErrorHandler,
+  ForbiddenError,
   NotFoundError,
+  registerError,
   UnauthorizedError,
 } from '../src'
 
@@ -86,6 +88,25 @@ describe('expected-error-handler', () => {
       expect(response.status).to.equal(401)
       expect(response.body).to.deep.equal({
         message: 'out here',
+      })
+    })
+  })
+
+  describe('custom errors', () => {
+    it('should send custom http code on CustomError', async () => {
+      class CustomError extends Error {}
+      CustomError.prototype.name = CustomError.name
+      registerError(CustomError, 442)
+
+      runServer(async () => {
+        throw new CustomError('custom error')
+      })
+
+      const { port } = server.address()
+      const response = await request(`http://localhost:${port}`).get('/some-route')
+      expect(response.status).to.equal(442)
+      expect(response.body).to.deep.equal({
+        message: 'custom error',
       })
     })
   })
