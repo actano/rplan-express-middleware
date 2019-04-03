@@ -17,7 +17,7 @@ const loggingHandler = (request, response, next) => {
     const startTime = process.hrtime()
     let logged = false
 
-    const logFinish = (event) => {
+    const logFinish = () => {
       if (logged) {
         return
       }
@@ -25,7 +25,7 @@ const loggingHandler = (request, response, next) => {
       const timeDelta = process.hrtime(startTime)
       statistics.duration = (timeDelta[0] * 1e9) + timeDelta[1]
 
-      logger.debug({ statistics, request, response }, 'req finished: %s %s (%s)', method, url, event)
+      logger.debug({ statistics, request, response }, 'req finished: %s %s', method, url)
     }
 
     logger.debug('req started: %s %s', method, url)
@@ -34,8 +34,8 @@ const loggingHandler = (request, response, next) => {
     // Instead the `close` event is emitted which usually indicates premature connection resets.
     // In order to not lose the finish log entry we try to log it in the `close` or `finish`
     // event, whichever comes first. (See https://github.com/spdy-http2/node-spdy/issues/327)
-    response.on('close', () => logFinish('close'))
-    response.on('finish', () => logFinish('finish'))
+    response.on('close', () => logFinish())
+    response.on('finish', () => logFinish())
   }
   next()
 }

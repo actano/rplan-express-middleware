@@ -1,7 +1,8 @@
 import { expect } from 'chai'
-
 import express from 'express'
 import request from 'supertest'
+
+import { CaptureStdout } from './helper/capture-stdout'
 
 import {
   catchAsyncErrors,
@@ -28,10 +29,40 @@ describe('logging-handler', () => {
     runServer(async (req, res) => {
       res.status(200).json({ foo: true })
     })
-
     const { port } = server.address()
+
     const response = await request(`http://localhost:${port}`).get('/some-route')
     expect(response.status).to.equal(200)
     expect(response.body).to.deep.equal({ foo: true })
+  })
+
+  // the following tests require @rplan/logger configured with LOG_LEVEL=debug
+  it('should log start and finish request', async () => {
+    runServer(async (req, res) => {
+      res.status(200).json({ foo: true })
+    })
+    const { port } = server.address()
+
+    const captureStdout = new CaptureStdout()
+    captureStdout.startCapture()
+
+    await request(`http://localhost:${port}`).get('/some-route')
+
+    captureStdout.stopCapture()
+    const json = captureStdout.getCapturedText().map(JSON.parse)
+
+    expect(json).to.have.length(2)
+
+    expect(json[0]).to.have.property('msg', 'req started: GET /some-route')
+
+    expect(json[1]).to.have.property('msg', 'req finished: GET /some-route')
+    expect(json[1].request).to.have.property('method', 'GET')
+    expect(json[1].request).to.have.property('originalUrl', '/some-route')
+    expect(json[1].request).to.have.property('url', '/some-route')
+    expect(json[1].request).to.have.property('headers')
+
+    expect(json[1].response).to.deep.equal({ statusCode: 200 })
+
+    expect(json[1].statistics).to.have.property('duration')
   })
 })

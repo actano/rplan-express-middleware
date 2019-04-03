@@ -15,7 +15,7 @@
     "clean:lib": "rm -rf lib",
     "lint": "eslint src",
     "prepublishOnly": "npm run clean && npm run ci && npm run build",
-    "test": "mocha test"
+    "test": "LOG_LEVEL=debug mocha test"
   },
   "files": [
     "lib",
