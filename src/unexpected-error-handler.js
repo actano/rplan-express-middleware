@@ -11,6 +11,6 @@ export const unexpectedErrorHandler = (err, req, res, next) => {
     return
   }
 
-  res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR).end()
   next()
 }
