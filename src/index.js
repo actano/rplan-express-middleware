@@ -1,5 +1,8 @@
 export * from './errors'
-export { expectedErrorHandler } from './expected-error-handler'
+export {
+  expectedErrorHandler,
+  registerError,
+} from './expected-error-handler'
 export { unexpectedErrorHandler } from './unexpected-error-handler'
 export { loggingHandler } from './logging-handler'
 export { catchAsyncErrors } from './catch-async-errors'
