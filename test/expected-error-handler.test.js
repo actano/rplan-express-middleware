@@ -115,6 +115,21 @@ describe('expected-error-handler', () => {
         message: 'custom error',
       })
     })
+    it('should send custom http msg on CustomError', async () => {
+      class CustomError extends Error {}
+      CustomError.prototype.name = CustomError.name
+      registerError(CustomError, 442, 'custom message')
+
+      runServer(async () => {
+        throw new CustomError('custom error')
+      })
+
+      const { port } = server.address()
+      const response = await request(`http://localhost:${port}`).get('/some-route')
+      expect(response.body).to.deep.equal({
+        message: 'custom message',
+      })
+    })
   })
 
   describe('misconfiguration', () => {

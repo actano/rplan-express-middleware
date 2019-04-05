@@ -13,13 +13,14 @@ const logger = createLogger('express-middleware')
 
 const errorRegistry = new Map()
 
-const registerError = (errorClass, httpStatusCode) => {
+const registerError = (errorClass, httpStatusCode, httpResponseMsg) => {
   if (errorRegistry.has(errorClass.name)) {
     throw new Error(`Missconfiguration, an error with name '${errorClass.name}' is already registered`)
   }
   errorRegistry.set(errorClass.name, {
     errorClass,
     httpStatusCode,
+    httpResponseMsg,
   })
 }
 
@@ -43,10 +44,9 @@ const expectedErrorHandler = (err, req, res, next) => {
     if (err instanceof errorEntry.errorClass) {
       logger.debug({ err }, `handled expected error: ${err.name}`)
 
-      res.status(errorEntry.httpStatusCode).json({
-        name: err.name,
-        message: err.message,
-      })
+      const { name } = err
+      const message = errorEntry.httpResponseMsg || err.message
+      res.status(errorEntry.httpStatusCode).json({ name, message })
 
       next()
       return
