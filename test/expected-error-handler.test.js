@@ -128,6 +128,7 @@ describe('expected-error-handler', () => {
       const response = await request(`http://localhost:${port}`).get('/some-route')
       expect(response.body).to.deep.equal({
         message: 'custom message',
+        name: 'CustomError',
       })
     })
   })
