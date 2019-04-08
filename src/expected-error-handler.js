@@ -40,7 +40,10 @@ const expectedErrorHandler = (err, req, res, next) => {
     if (err instanceof errorEntry.errorClass) {
       logger.debug({ err }, `handled expected error: ${err.name}`)
 
-      res.status(errorEntry.httpStatusCode).json({ message: err.message })
+      res.status(errorEntry.httpStatusCode).json({
+        name: err.name,
+        message: err.message,
+      })
 
       next()
       return
