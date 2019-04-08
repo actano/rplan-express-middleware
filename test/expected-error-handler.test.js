@@ -39,6 +39,7 @@ describe('expected-error-handler', () => {
       const response = await request(`http://localhost:${port}`).get('/some-route')
       expect(response.status).to.equal(404)
       expect(response.body).to.deep.equal({
+        name: 'NotFoundError',
         message: 'not found',
       })
     })
@@ -51,6 +52,7 @@ describe('expected-error-handler', () => {
       const response = await request(`http://localhost:${port}`).get('/some-route')
       expect(response.status).to.equal(400)
       expect(response.body).to.deep.equal({
+        name: 'BadRequestError',
         message: 'very bad',
       })
     })
@@ -63,6 +65,7 @@ describe('expected-error-handler', () => {
       const response = await request(`http://localhost:${port}`).get('/some-route')
       expect(response.status).to.equal(409)
       expect(response.body).to.deep.equal({
+        name: 'ConflictError',
         message: 'conflicts',
       })
     })
@@ -75,6 +78,7 @@ describe('expected-error-handler', () => {
       const response = await request(`http://localhost:${port}`).get('/some-route')
       expect(response.status).to.equal(403)
       expect(response.body).to.deep.equal({
+        name: 'ForbiddenError',
         message: 'you not',
       })
     })
@@ -87,6 +91,7 @@ describe('expected-error-handler', () => {
       const response = await request(`http://localhost:${port}`).get('/some-route')
       expect(response.status).to.equal(401)
       expect(response.body).to.deep.equal({
+        name: 'UnauthorizedError',
         message: 'out here',
       })
     })
@@ -106,6 +111,7 @@ describe('expected-error-handler', () => {
       const response = await request(`http://localhost:${port}`).get('/some-route')
       expect(response.status).to.equal(442)
       expect(response.body).to.deep.equal({
+        name: 'CustomError',
         message: 'custom error',
       })
     })
