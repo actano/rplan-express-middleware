@@ -83,7 +83,7 @@ There are the following standard errors defined:
   app.get('/some-route', catchAsyncErrors(async (req, res) => {
     if (notFoundCondition) {
       throw new NotFoundError('foo') 
-      // middleware sends status 404 with the body { message: 'foo' }
+      // middleware sends status 404 with the body { name: 'NotFoundError', message: 'foo' }
     }
     // ...
   }))
@@ -106,11 +106,17 @@ With the function `registerError` custom errors can be registered together with 
     app.get('/some-route', catchAsyncErrors(async (req, res) => {
       if (customFoundCondition) {
         throw new CustomError('custom') 
-        // middleware sends status 442 with body { message: 'custom' }
+        // middleware sends status 442 with body { name: 'CustomError', message: 'custom' }
       }
       // ...
     }))
 ```
+
+Make sure that the name property of the error is unique, errors with same name cant be registered
+twice. 
+
+The message of the error is exposed to the calling client. Make sure that the error message 
+do not contain any security information, like session ids. 
 
 # loggingHandler
 
