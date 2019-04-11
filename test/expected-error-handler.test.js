@@ -116,4 +116,15 @@ describe('expected-error-handler', () => {
       })
     })
   })
+
+  describe('misconfiguration', () => {
+    it('should not register the same error twice', async () => {
+      class AnotherCustomError extends Error {}
+      AnotherCustomError.prototype.name = AnotherCustomError.name
+      registerError(AnotherCustomError, 442)
+      expect(() => {
+        registerError(AnotherCustomError, 400)
+      }).to.throw(Error)
+    })
+  })
 })

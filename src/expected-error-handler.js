@@ -14,6 +14,9 @@ const logger = createLogger('express-middleware')
 const errorRegistry = new Map()
 
 const registerError = (errorClass, httpStatusCode) => {
+  if (errorRegistry.has(errorClass.name)) {
+    throw new Error(`Missconfiguration, an error with name '${errorClass.name}' is already registered`)
+  }
   errorRegistry.set(errorClass.name, {
     errorClass,
     httpStatusCode,
