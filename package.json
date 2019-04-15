@@ -17,6 +17,10 @@
     "prepublishOnly": "npm run clean && npm run ci && npm run build",
     "test": "LOG_LEVEL=debug mocha test"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/actano/rplan-express-middleware.git"
+  },
   "files": [
     "lib",
     "src"
