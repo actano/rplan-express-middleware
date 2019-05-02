@@ -116,19 +116,19 @@ describe('expected-error-handler', () => {
       })
     })
     it('should send custom http msg on CustomError', async () => {
-      class CustomError extends Error {}
-      CustomError.prototype.name = CustomError.name
-      registerError(CustomError, 442, 'custom message')
+      class CustomErrorWithDifferentMsg extends Error {}
+      CustomErrorWithDifferentMsg.prototype.name = CustomErrorWithDifferentMsg.name
+      registerError(CustomErrorWithDifferentMsg, 442, 'custom message')
 
       runServer(async () => {
-        throw new CustomError('custom error')
+        throw new CustomErrorWithDifferentMsg('custom error')
       })
 
       const { port } = server.address()
       const response = await request(`http://localhost:${port}`).get('/some-route')
       expect(response.body).to.deep.equal({
         message: 'custom message',
-        name: 'CustomError',
+        name: 'CustomErrorWithDifferentMsg',
       })
     })
   })
