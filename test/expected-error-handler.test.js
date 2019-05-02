@@ -131,6 +131,24 @@ describe('expected-error-handler', () => {
         name: 'CustomErrorWithDifferentMsg',
       })
     })
+    it('should send custom http msg on CustomError when passed as option', async () => {
+      class CustomErrorForOptionTest extends Error {}
+      CustomErrorForOptionTest.prototype.name = CustomErrorForOptionTest.name
+      registerError(CustomErrorForOptionTest, 442, {
+        httpResponseMsg: 'custom message',
+      })
+
+      runServer(async () => {
+        throw new CustomErrorForOptionTest('custom error')
+      })
+
+      const { port } = server.address()
+      const response = await request(`http://localhost:${port}`).get('/some-route')
+      expect(response.body).to.deep.equal({
+        message: 'custom message',
+        name: 'CustomErrorForOptionTest',
+      })
+    })
   })
 
   describe('misconfiguration', () => {
