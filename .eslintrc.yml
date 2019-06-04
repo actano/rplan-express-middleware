@@ -9,8 +9,6 @@ rules:
     - error
     - devDependencies:
         - 'test/**/*.js'
-  import/prefer-default-export:
-    - off
 
 overrides:
   - files:
