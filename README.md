@@ -143,3 +143,44 @@ This middleware should be placed at the top and use `@rplan/logger` for logging.
   app.use(someRoute)
 
 ```
+
+# requestMetrics
+
+Collect metrics of requests based on the request method, path and response status code. The metrics
+are collected with `prom-client` which should be made available as a peer dependency. The middleware
+only collects metrics but doesn't provide an endpoint for prometheus itself. A metrics endpoint has
+to be provided on its own using `prom-client`.
+
+The following metrics are collected:
+* `http_requests_total` - Counts all requests using labels for `method`, `path` and `status`
+* `http_request_duration_ms` - Collects response times in a histogram using labels for `method`, 
+  `path` and `status`
+  
+Options:
+* `pathPatterns` - array of express path patterns which are used to normalize paths. This is helpful
+  for endpoints which contain path parameters and will collect all corresponding requests with the
+  pattern as `path` label
+* `ignoredPaths` - array of paths to ignore for metric collection. Also recognizes path patterns.
+* `requestDurationBuckets` - the buckets to use for the request duration histogram
+
+```javascript
+import express from 'express'
+import { requestMetrics } from '@rplan/express-middleware'
+
+const app = express()
+
+app.use(requestMetrics({
+  pathPatterns: [
+    '/foo/:id',
+    '/foo/:id/test',
+  ],
+  ignoredPaths: [
+    '/metrics',
+  ],
+  requestDurationBuckets: [10, 100, 1000, 2000],
+}))
+
+app.get('/foo/:id', (req, res) => {
+  // ....
+})
+```
