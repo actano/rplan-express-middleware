@@ -7,3 +7,8 @@ export { unexpectedErrorHandler } from './unexpected-error-handler'
 export { loggingHandler } from './logging-handler'
 export { catchAsyncErrors } from './catch-async-errors'
 export { requestMetrics } from './request-metrics'
+export {
+  startServer,
+  shutdownServer,
+  handleServerLifecycle,
+} from './server-lifecycle'
