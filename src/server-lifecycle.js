@@ -5,15 +5,24 @@ const logger = createLogger('express-lifecycle')
 
 const noop = () => {}
 
-function startServer(expressApp, port, keepAliveGracePeriod, onStart = noop) {
-  return stoppable(expressApp.listen(port, onStart), keepAliveGracePeriod)
+async function startServer(expressApp, port, keepAliveGracePeriod, onStart = noop) {
+  return new Promise((resolve) => {
+    const server = stoppable(
+      expressApp.listen(port, async () => {
+        logger.info(`server listening on port ${port}`)
+        await onStart()
+        resolve(server)
+      }),
+      keepAliveGracePeriod,
+    )
+  })
 }
 
 function shutdownServer(server, onShutdown = noop) {
   logger.info('shutting down server')
-  server.stop((err, gracefully) => {
+  server.stop(async (err, gracefully) => {
     logger.info({ gracefully }, 'server was shut down')
-    onShutdown()
+    await onShutdown()
   })
 }
 
@@ -24,7 +33,7 @@ const defaultOptions = {
   onShutdown: noop,
 }
 
-function handleServerLifecycle(expressApp, port, options) {
+async function handleServerLifecycle(expressApp, port, options) {
   const effectiveOptions = {
     ...defaultOptions,
     ...options,
@@ -37,7 +46,7 @@ function handleServerLifecycle(expressApp, port, options) {
     onShutdown,
   } = effectiveOptions
 
-  const server = startServer(expressApp, port, keepAliveGracePeriod, onStart)
+  const server = await startServer(expressApp, port, keepAliveGracePeriod, onStart)
   const shutdown = () => {
     shutdownServer(server, onShutdown)
   }
