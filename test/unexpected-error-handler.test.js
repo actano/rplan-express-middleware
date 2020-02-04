@@ -35,6 +35,7 @@ describe('unexpected-error-handler', () => {
     expect(response.body).to.deep.equal({ })
     expect(response.text).to.equal('Internal Server Error')
   })
+
   it('should respond with err.status for unexpected errors', async () => {
     runServer(async () => {
       const err = new Error('server error')

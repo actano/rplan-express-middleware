@@ -13,7 +13,7 @@ export const unexpectedErrorHandler = (err, req, res, next) => {
     // errors with status prop are meant to respond (also default behaviour of express)
     // they are thrown by various middleware e.g. body-parser on parsing errors
     logger.debug({ err }, `handled http error: ${err.name}`)
-    res.sendStatus(err.status).send(err.message)
+    res.sendStatus(err.status)
     next()
     return
   }
