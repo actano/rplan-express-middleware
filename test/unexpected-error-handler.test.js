@@ -10,9 +10,10 @@ import {
 
 describe('unexpected-error-handler', () => {
   let server
+  let app
 
   function runServer(middleware) {
-    const app = express()
+    app = express()
     app.get('/some-route', catchAsyncErrors(middleware))
     app.use(unexpectedErrorHandler)
     server = app.listen()
@@ -47,5 +48,49 @@ describe('unexpected-error-handler', () => {
     const { port } = server.address()
     const response = await request(`http://localhost:${port}`).get('/some-route')
     expect(response.status).to.equal(400)
+  })
+
+  it('should not call next middleware', async () => {
+    let nextMiddlewareCalled = false
+
+    // eslint-disable-next-line no-unused-vars
+    const nextMiddleware = (req, res, next) => {
+      nextMiddlewareCalled = true
+    }
+
+    runServer(async () => {
+      throw new Error()
+    })
+
+    app.use(nextMiddleware)
+
+    const { port } = server.address()
+    await request(`http://localhost:${port}`).get('/some-route')
+
+    expect(nextMiddlewareCalled).to.equal(false)
+  })
+
+  context('when response was already sent', () => {
+    // logging cannot be tested currently
+    it('should not call next middleware and log the error', async () => {
+      let nextMiddlewareCalled = false
+
+      // eslint-disable-next-line no-unused-vars
+      const nextMiddleware = (req, res, next) => {
+        nextMiddlewareCalled = true
+      }
+
+      runServer(async (req, res) => {
+        res.sendStatus(200)
+        throw new Error()
+      })
+
+      app.use(nextMiddleware)
+
+      const { port } = server.address()
+      await request(`http://localhost:${port}`).get('/some-route')
+
+      expect(nextMiddlewareCalled).to.equal(false)
+    })
   })
 })

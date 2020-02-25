@@ -16,9 +16,10 @@ import {
 
 describe('expected-error-handler', () => {
   let server
+  let app
 
   function runServer(middleware) {
-    const app = express()
+    app = express()
     app.get('/some-route', catchAsyncErrors(middleware))
     app.use(expectedErrorHandler)
     server = app.listen()
@@ -125,6 +126,78 @@ describe('expected-error-handler', () => {
       expect(() => {
         registerError(AnotherCustomError, 400)
       }).to.throw(Error)
+    })
+  })
+
+  describe('when response was already sent', () => {
+    it('should propagate error to next middleware', async () => {
+      const error = new Error()
+      let errorInNextMiddleware = null
+
+      // eslint-disable-next-line no-unused-vars
+      const nextMiddleware = (err, req, res, next) => {
+        errorInNextMiddleware = err
+      }
+
+      runServer(async (req, res) => {
+        res.sendStatus(200)
+        throw error
+      })
+
+      app.use(nextMiddleware)
+
+      const { port } = server.address()
+      const response = await request(`http://localhost:${port}`).get('/some-route')
+      expect(response.status).to.equal(200)
+
+      expect(errorInNextMiddleware).to.equal(error)
+    })
+  })
+
+  describe('on unexpected error', () => {
+    it('should propagate error to next middleware', async () => {
+      const error = new Error()
+      let errorInNextMiddleware = null
+
+      // eslint-disable-next-line no-unused-vars
+      const nextMiddleware = (err, req, res, next) => {
+        errorInNextMiddleware = err
+        res.sendStatus(200)
+      }
+
+      runServer(async () => {
+        throw error
+      })
+
+      app.use(nextMiddleware)
+
+      const { port } = server.address()
+      const response = await request(`http://localhost:${port}`).get('/some-route')
+      expect(response.status).to.equal(200)
+
+      expect(errorInNextMiddleware).to.equal(error)
+    })
+  })
+
+  describe('when error is handled', () => {
+    it('should not call next middleware', async () => {
+      let nextMiddlewareCalled = false
+
+      // eslint-disable-next-line no-unused-vars
+      const nextMiddleware = (req, res, next) => {
+        nextMiddlewareCalled = true
+      }
+
+      runServer(async () => {
+        throw new NotFoundError()
+      })
+
+      app.use(nextMiddleware)
+
+      const { port } = server.address()
+      await request(`http://localhost:${port}`).get('/some-route')
+
+      expect(nextMiddlewareCalled).to.equal(false)
     })
   })
 })

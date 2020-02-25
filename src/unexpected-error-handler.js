@@ -3,9 +3,11 @@ import createLogger from '@rplan/logger'
 
 const logger = createLogger('express-middleware')
 
+// We need to have 4 arguments according to the express API
+// eslint-disable-next-line no-unused-vars
 export const unexpectedErrorHandler = (err, req, res, next) => {
   if (res && res.headersSent) {
-    next()
+    logger.error({ err }, 'unexpected error after response was sent')
     return
   }
 
@@ -14,11 +16,9 @@ export const unexpectedErrorHandler = (err, req, res, next) => {
     // they are thrown by various middleware e.g. body-parser on parsing errors
     logger.debug({ err }, `handled http error: ${err.name}`)
     res.sendStatus(err.status)
-    next()
     return
   }
 
   logger.error({ err }, 'unexpected error')
   res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR).end()
-  next()
 }

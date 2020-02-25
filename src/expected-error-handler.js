@@ -35,7 +35,7 @@ registerStandardErrors()
 
 const expectedErrorHandler = (err, req, res, next) => {
   if (res && res.headersSent) {
-    next()
+    next(err)
     return
   }
 
@@ -48,7 +48,6 @@ const expectedErrorHandler = (err, req, res, next) => {
         message: err.message,
       })
 
-      next()
       return
     }
   }
