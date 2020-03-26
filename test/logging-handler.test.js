@@ -5,16 +5,16 @@ import request from 'supertest'
 import { CaptureStdout } from './helper/capture-stdout'
 
 import {
-  catchAsyncErrors,
+  catchAsyncErrors, HANDLER_LOG_LEVEL,
   loggingHandler,
 } from '../src'
 
 describe('logging-handler', () => {
   let server
 
-  function runServer(middleware) {
+  function runServer(logLevel, middleware) {
     const app = express()
-    app.use(loggingHandler)
+    app.use(loggingHandler(logLevel))
     app.get('/some-route', catchAsyncErrors(middleware))
     server = app.listen()
   }
@@ -26,7 +26,7 @@ describe('logging-handler', () => {
   })
 
   it('should not block requests', async () => {
-    runServer(async (req, res) => {
+    runServer(HANDLER_LOG_LEVEL.DEBUG, async (req, res) => {
       res.status(200).json({ foo: true })
     })
     const { port } = server.address()
@@ -38,7 +38,7 @@ describe('logging-handler', () => {
 
   // the following tests require @rplan/logger configured with LOG_LEVEL=debug
   it('should log start and finish request', async () => {
-    runServer(async (req, res) => {
+    runServer(HANDLER_LOG_LEVEL.DEBUG, async (req, res) => {
       res.status(200).json({ foo: true })
     })
     const { port } = server.address()
@@ -64,5 +64,25 @@ describe('logging-handler', () => {
     expect(json[1].response).to.deep.equal({ statusCode: 200 })
 
     expect(json[1].statistics).to.have.property('duration')
+  })
+
+  it('should use the configured log level', async () => {
+    runServer(HANDLER_LOG_LEVEL.INFO, async (req, res) => {
+      res.status(200).json({ foo: true })
+    })
+    const { port } = server.address()
+
+    const captureStdout = new CaptureStdout()
+    captureStdout.startCapture()
+
+    await request(`http://localhost:${port}`).get('/some-route')
+
+    captureStdout.stopCapture()
+    const json = captureStdout.getCapturedText().map(JSON.parse)
+
+    expect(json).to.have.length(2)
+
+    expect(json[0]).to.have.property('level', 30)
+    expect(json[1]).to.have.property('level', 30)
   })
 })
