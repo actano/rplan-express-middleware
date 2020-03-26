@@ -1,12 +1,12 @@
 import createLogger from '@rplan/logger'
 
-import { requesetSerializer } from './serializer/request'
+import { requestSerializer } from './serializer/request'
 import { responseSerializer } from './serializer/response'
 
 const logger = createLogger('express-middleware')
 
 logger.addSerializers({
-  request: requesetSerializer,
+  request: requestSerializer,
   response: responseSerializer,
 })
 

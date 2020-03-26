@@ -20,7 +20,7 @@ const REQUEST_PROPERTY_WHITELIST = [
   'xhr',
 ]
 
-const requesetSerializer = flow(
+const requestSerializer = flow(
   pick(REQUEST_PROPERTY_WHITELIST),
   update('headers', omit([
     'authorization',
@@ -30,5 +30,5 @@ const requesetSerializer = flow(
 )
 
 export {
-  requesetSerializer,
+  requestSerializer,
 }
