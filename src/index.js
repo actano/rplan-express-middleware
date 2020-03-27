@@ -12,4 +12,4 @@ export {
   shutdownServer,
   handleServerLifecycle,
 } from './server-lifecycle'
-export { requestIdMiddleware } from './request-id'
+export { requestIdMiddleware, getRequestId } from './request-id'
