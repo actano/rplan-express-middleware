@@ -2,8 +2,11 @@ import createLogger from '@rplan/logger'
 
 import { requestSerializer } from './serializer/request'
 import { responseSerializer } from './serializer/response'
+import { getRequestId } from './request-id'
 
 const logger = createLogger('express-middleware')
+
+const LOGGER_PROPERTY = Symbol('logger_property')
 
 logger.addSerializers({
   request: requestSerializer,
@@ -29,12 +32,21 @@ const getLogFn = (logLevel) => {
   }
 }
 
+const getRequestLogger = req => req[LOGGER_PROPERTY]
+
 const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
   const log = getLogFn(logLevel)
 
   return (request, response, next) => {
     const { method, url } = request
     if (method !== 'HEAD') {
+      const requestId = getRequestId(request)
+
+      request[LOGGER_PROPERTY] = logger.child({
+        request,
+        requestId,
+      })
+
       const statistics = {}
       const startTime = process.hrtime()
       let logged = false
@@ -47,10 +59,15 @@ const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
         const timeDelta = process.hrtime(startTime)
         statistics.duration = (timeDelta[0] * 1e9) + timeDelta[1]
 
-        log({ statistics, request, response }, 'req finished: %s %s', method, url)
+        log(
+          {
+            requestId, statistics, request, response,
+          },
+          'req finished: %s %s', method, url,
+        )
       }
 
-      log('req started: %s %s', method, url)
+      log({ requestId }, 'req started: %s %s', method, url)
 
       // When running in HTTP/2 mode via `spdy` the `finish` event doesn't seem to be emitted.
       // Instead the `close` event is emitted which usually indicates premature connection resets.
@@ -65,5 +82,6 @@ const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
 
 export {
   loggingHandler,
+  getRequestLogger,
   HANDLER_LOG_LEVEL,
 }

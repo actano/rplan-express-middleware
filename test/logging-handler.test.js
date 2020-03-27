@@ -5,17 +5,17 @@ import request from 'supertest'
 import { CaptureStdout } from './helper/capture-stdout'
 
 import {
-  catchAsyncErrors, HANDLER_LOG_LEVEL,
-  loggingHandler,
+  catchAsyncErrors, getRequestLogger, HANDLER_LOG_LEVEL,
+  loggingHandler, requestIdMiddleware,
 } from '../src'
 
 describe('logging-handler', () => {
   let server
 
-  function runServer(logLevel, middleware) {
+  function runServer(logLevel, handler) {
     const app = express()
     app.use(loggingHandler(logLevel))
-    app.get('/some-route', catchAsyncErrors(middleware))
+    app.get('/some-route', catchAsyncErrors(handler))
     server = app.listen()
   }
 
@@ -84,5 +84,56 @@ describe('logging-handler', () => {
 
     expect(json[0]).to.have.property('level', 30)
     expect(json[1]).to.have.property('level', 30)
+  })
+
+  it('should create a child logger on the request object', async () => {
+    runServer(HANDLER_LOG_LEVEL.INFO, async (req, res) => {
+      const childLogger = getRequestLogger(req)
+      childLogger.info({ isChild: true }, 'log from child logger')
+      res.status(200).json({ foo: true })
+    })
+    const { port } = server.address()
+
+    const captureStdout = new CaptureStdout()
+    captureStdout.startCapture()
+
+    await request(`http://localhost:${port}`).get('/some-route')
+
+    captureStdout.stopCapture()
+    const json = captureStdout.getCapturedText().map(JSON.parse)
+
+    expect(json).to.have.length(3)
+
+    expect(json[1]).to.have.property('msg', 'log from child logger')
+    expect(json[1]).to.have.property('isChild', true)
+  })
+
+  context('when request id middleware is used', () => {
+    it('should log the request id', async () => {
+      const app = express()
+      app.use(requestIdMiddleware())
+      app.use(loggingHandler(HANDLER_LOG_LEVEL.DEBUG))
+      app.get('/some-route', catchAsyncErrors(async (req, res) => {
+        res.status(200).json({ foo: true })
+      }))
+      server = app.listen()
+
+      const { port } = server.address()
+
+      const captureStdout = new CaptureStdout()
+      captureStdout.startCapture()
+
+      await request(`http://localhost:${port}`)
+        .get('/some-route')
+        .set('x-request-id', 'my-test-request-id')
+
+      captureStdout.stopCapture()
+      const json = captureStdout.getCapturedText().map(JSON.parse)
+
+      expect(json).to.have.length(2)
+
+      expect(json[0]).to.have.property('requestId', 'my-test-request-id')
+      expect(json[1]).to.have.property('requestId', 'my-test-request-id')
+    })
   })
 })
