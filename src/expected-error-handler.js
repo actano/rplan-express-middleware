@@ -8,8 +8,9 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from './errors'
+import { getRequestLogger } from './logging-handler'
 
-const logger = createLogger('express-middleware')
+const defaultLogger = createLogger('express-middleware')
 
 const errorRegistry = new Map()
 
@@ -41,6 +42,7 @@ const expectedErrorHandler = (err, req, res, next) => {
 
   for (const errorEntry of errorRegistry.values()) {
     if (err instanceof errorEntry.errorClass) {
+      const logger = getRequestLogger(req) || defaultLogger
       logger.debug({ err }, `handled expected error: ${err.name}`)
 
       res.status(errorEntry.httpStatusCode).json({

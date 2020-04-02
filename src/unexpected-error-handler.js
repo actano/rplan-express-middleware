@@ -1,11 +1,14 @@
 import * as HttpStatus from 'http-status-codes'
 import createLogger from '@rplan/logger'
+import { getRequestLogger } from './logging-handler'
 
-const logger = createLogger('express-middleware')
+const defaultLogger = createLogger('express-middleware')
 
 // We need to have 4 arguments according to the express API
 // eslint-disable-next-line no-unused-vars
 export const unexpectedErrorHandler = (err, req, res, next) => {
+  const logger = getRequestLogger(req) || defaultLogger
+
   if (res && res.headersSent) {
     logger.error({ err }, 'unexpected error after response was sent')
     return
