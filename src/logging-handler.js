@@ -59,9 +59,15 @@ const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
         const timeDelta = process.hrtime(startTime)
         statistics.duration = (timeDelta[0] * 1e9) + timeDelta[1]
 
+        let endpoint
+
+        if (request.route != null && request.route.path != null && request.method != null) {
+          endpoint = `${request.method} ${request.route.path}`
+        }
+
         log(
           {
-            requestId, statistics, request, response,
+            requestId, statistics, request, response, endpoint,
           },
           'req finished: %s %s', method, url,
         )

@@ -136,4 +136,30 @@ describe('logging-handler', () => {
       expect(json[1]).to.have.property('requestId', 'my-test-request-id')
     })
   })
+
+  context('when endpoint is matched', () => {
+    it('should log the endpoint information', async () => {
+      const app = express()
+      app.use(loggingHandler(HANDLER_LOG_LEVEL.INFO))
+      app.patch('/resource/:resourceId/subresource/:subresourceId', catchAsyncErrors(async (req, res) => {
+        res.sendStatus(200)
+      }))
+      server = app.listen()
+      const { port } = server.address()
+
+      const captureStdout = new CaptureStdout()
+      captureStdout.startCapture()
+
+      await request(`http://localhost:${port}`).patch('/resource/foo/subresource/bar')
+
+      captureStdout.stopCapture()
+      const json = captureStdout.getCapturedText().map(JSON.parse)
+
+      expect(json).to.have.length(2)
+
+      expect(json[0]).to.have.property('level', 30)
+      expect(json[1]).to.have.property('level', 30)
+      expect(json[1]).to.have.property('endpoint', 'PATCH /resource/:resourceId/subresource/:subresourceId')
+    })
+  })
 })
