@@ -60,7 +60,7 @@ declare namespace middleware {
       onStart?: () => void | Promise<void>,
       onShutdown?: () => void | Promise<void>,
     },
-  ): () => void
+  ): () => Promise<void>
 }
 
 export = middleware
