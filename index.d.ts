@@ -77,6 +77,14 @@ declare namespace middleware {
     closed: boolean,
   }
 
+  class RequestContextBase implements RequestContext {
+    requestId: string
+
+    logger: Logger
+
+    closed: boolean
+  }
+
   function initializeRequestContext<T extends RequestContext>(createContext: (req: Request) => T): {
     getRequestContext(req: Request): T,
     requestContext(req: Request, res: Response, next: NextFunction): void,

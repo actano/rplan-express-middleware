@@ -5,7 +5,7 @@ import request from 'supertest'
 import {
   catchAsyncErrors,
   initializeRequestContext, loggingHandler,
-  RequestContext, requestIdMiddleware,
+  RequestContextBase, requestIdMiddleware,
 } from '../src'
 
 describe('request context middleware', () => {
@@ -37,7 +37,7 @@ describe('request context middleware', () => {
       requestContext,
       ensureRequestIsRunning,
       handleRequestClosedError,
-    } = initializeRequestContext(req => new RequestContext(req)))
+    } = initializeRequestContext(req => new RequestContextBase(req)))
   })
 
   afterEach(() => {

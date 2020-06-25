@@ -15,6 +15,6 @@ export {
 export { requestIdMiddleware, getRequestId } from './request-id'
 export {
   RequestClosed,
-  RequestContext,
+  RequestContextBase,
   initializeRequestContext,
 } from './request-context'

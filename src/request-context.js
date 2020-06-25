@@ -4,7 +4,7 @@ import { getRequestLogger } from './logging-handler'
 class RequestClosed extends Error {}
 RequestClosed.prototype.name = RequestClosed.name
 
-class RequestContext {
+class RequestContextBase {
   constructor(req) {
     this.req = req
 
@@ -72,7 +72,7 @@ function initializeRequestContext(createContext) {
 }
 
 export {
-  RequestContext,
+  RequestContextBase,
   RequestClosed,
   initializeRequestContext,
 }
