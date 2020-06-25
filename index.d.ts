@@ -83,6 +83,8 @@ declare namespace middleware {
     logger: Logger
 
     closed: boolean
+
+    constructor(req: Request)
   }
 
   function initializeRequestContext<T extends RequestContext>(createContext: (req: Request) => T): {
