@@ -1,5 +1,12 @@
 import { Logger } from '@rplan/logger'
-import { ErrorRequestHandler, Express, Request, RequestHandler, Response } from 'express'
+import {
+  ErrorRequestHandler,
+  Express,
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+} from 'express'
 import { StoppableServer } from 'stoppable'
 
 declare namespace middleware {
@@ -61,6 +68,27 @@ declare namespace middleware {
       onShutdown?: () => void | Promise<void>,
     },
   ): () => Promise<void>
+
+  class RequestClosed extends Error {}
+
+  class RequestContext {
+    requestId: string
+
+    logger: Logger
+
+    closed: boolean
+
+    protected req: Request
+
+    constructor(req: Request)
+  }
+
+  function initializeRequestContext<T extends RequestContext>(Class: new (req: Request) => T): {
+    getRequestContext(req: Request): T,
+    requestContext(req: Request, res: Response, next: NextFunction): void,
+    ensureRequestIsRunning(context: T): void
+    handleRequestClosedError(err: unknown, req: Request, res: Response, next: NextFunction): void,
+  }
 }
 
 export = middleware

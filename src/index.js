@@ -13,3 +13,8 @@ export {
   handleServerLifecycle,
 } from './server-lifecycle'
 export { requestIdMiddleware, getRequestId } from './request-id'
+export {
+  RequestClosed,
+  RequestContext,
+  initializeRequestContext,
+} from './request-context'
