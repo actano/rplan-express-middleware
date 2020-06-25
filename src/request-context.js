@@ -24,11 +24,11 @@ class RequestContext {
 
 const REQUEST_CONTEXT_PROP = Symbol('request_context_prop')
 
-function initializeRequestContext(Class) {
+function initializeRequestContext(createContext) {
   const getRequestContext = req => req[REQUEST_CONTEXT_PROP]
 
   function initializeContext(req) {
-    return new Class(req)
+    return createContext(req)
   }
 
   function requestContext(req, res, next) {

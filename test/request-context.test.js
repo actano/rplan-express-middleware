@@ -37,7 +37,7 @@ describe('request context middleware', () => {
       requestContext,
       ensureRequestIsRunning,
       handleRequestClosedError,
-    } = initializeRequestContext(RequestContext))
+    } = initializeRequestContext(req => new RequestContext(req)))
   })
 
   afterEach(() => {
