@@ -84,6 +84,8 @@ declare namespace middleware {
 
     closed: boolean
 
+    protected req: Request
+
     constructor(req: Request)
   }
 
