@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-- '10'
+- '12'
 cache: yarn
 script:
 - npm run ci
@@ -11,6 +11,6 @@ deploy:
   on:
     tags: true
     repo: actano/rplan-express-middleware
-    node: '10'
+    node: '12'
   api_key:
     secure: rqeFdLRWu4Q8c/KcDcQJeWA8U4gzTlr2fy/kwauKUEArlHTlB2DATxZJnzPdtntsaAxCC7Q2biVOzLEGc2cfZJGPJWDYD5Vf59m4ItjlvneWhROe8laYqEWHfGaXI+d9lH1uRgzfsAd40bSfccc0OBhw+iwkYt2K8lvIyWvZjUfWHEJAjRfJmwx8yzn9mINyOYCbTM5jVwPAYfN9xYmUyrPHcs+pqcGTeEz40ZgxcDBB6lxQKGpG2C26EyNw2ILjh1u3Arb4cREFcxbjSehpYH42ZEY3v2iqCysRyI8h+nLkUodTkzHGP/uROh9cCuW6Ww2IOoj+QOhn2g+N8WzgkxAYMLnmKOacoq58VidwTgVc/sGam6PBRR+eykJF/upKSKKUlAc4pGfxIX/LfHFGUJ/M9n1VgRa+hRkcUfron+dKV2oiTPUWm8XS95S8AmUF72svOEo9Je0lswpMWhrg4yzeGGbA8NDAbQ2lLbzwMTEGxcRGXQ6JtLJX507MtycoOtfASCnUz4uyszhlSgJC+Txr+5gN1rv/YWgenAxd3qiT39emo2NoCZrGQ+FB3pBOgwg63HS85ykwmTc0DHN0eSw9lBpG4cJZBB+WOESdHqFIRAJXnK/K4lJgnt9pr8S6UPVuHC1C+hTe8qCT7JhgvjsKEqBRQzDEARzAJ8yD2kU=
