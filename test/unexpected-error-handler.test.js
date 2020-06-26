@@ -70,6 +70,32 @@ describe('unexpected-error-handler', () => {
     expect(nextMiddlewareCalled).to.equal(false)
   })
 
+  context('if status prop on error was set', () => {
+    it('should respond with the status for 5xx errors', async () => {
+      runServer(async () => {
+        const error = new Error('server error')
+        error.status = 503
+        throw error
+      })
+
+      const { port } = server.address()
+      const response = await request(`http://localhost:${port}`).get('/some-route')
+      expect(response.status).to.equal(503)
+    })
+
+    it('should respond with the status for non 5xx errors', async () => {
+      runServer(async () => {
+        const error = new Error('server error')
+        error.status = 403
+        throw error
+      })
+
+      const { port } = server.address()
+      const response = await request(`http://localhost:${port}`).get('/some-route')
+      expect(response.status).to.equal(403)
+    })
+  })
+
   context('when response was already sent', () => {
     // logging cannot be tested currently
     it('should not call next middleware and log the error', async () => {
