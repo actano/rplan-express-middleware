@@ -72,21 +72,21 @@ declare namespace middleware {
   class RequestClosed extends Error {}
 
   interface RequestContext {
-    requestId: string,
-    logger: Logger,
-    closed: boolean,
+    getRequestId(): string,
+    getLogger(): Logger,
+    isClosed(): boolean,
   }
 
   class RequestContextBase implements RequestContext {
-    requestId: string
-
-    logger: Logger
-
-    closed: boolean
-
     protected req: Request
 
     constructor(req: Request)
+
+    getRequestId(): string
+
+    getLogger(): Logger
+
+    isClosed(): boolean
   }
 
   function initializeRequestContext<T extends RequestContext>(createContext: (req: Request) => T): {

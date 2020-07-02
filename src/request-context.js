@@ -20,6 +20,18 @@ class RequestContextBase {
       this.closed = true
     })
   }
+
+  getRequestId() {
+    return this.requestId
+  }
+
+  getLogger() {
+    return this.logger
+  }
+
+  isClosed() {
+    return this.closed
+  }
 }
 
 const REQUEST_CONTEXT_PROP = Symbol('request_context_prop')
@@ -39,7 +51,7 @@ function initializeRequestContext(createContext) {
     next()
   }
 
-  const isRequestClosed = context => context != null && context.closed
+  const isRequestClosed = context => context != null && context.isClosed()
 
   function ensureRequestIsRunning(context) {
     if (isRequestClosed(context)) {
@@ -59,7 +71,7 @@ function initializeRequestContext(createContext) {
     }
 
     if (context != null) {
-      context.logger.debug('handled request closed error')
+      context.getLogger().debug('handled request closed error')
     }
   }
 
