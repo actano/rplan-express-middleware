@@ -26,11 +26,15 @@ declare namespace middleware {
 
   function catchAsyncErrors(fn: (req: Request, res: Response) => Promise<any>): RequestHandler
 
-  class NotFoundError extends Error {}
-  class ConflictError extends Error {}
-  class BadRequestError extends Error {}
-  class ForbiddenError extends Error {}
-  class UnauthorizedError extends Error {}
+  class HttpError extends Error {}
+  class ClientError extends HttpError {}
+  class NotFoundError extends ClientError {}
+  class ConflictError extends ClientError {}
+  class BadRequestError extends ClientError {}
+  class ForbiddenError extends ClientError {}
+  class UnauthorizedError extends ClientError {}
+
+  function isClientError(error: Error): boolean
 
   const expectedErrorHandler: ErrorRequestHandler
 
