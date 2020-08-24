@@ -1,14 +1,33 @@
-export class NotFoundError extends Error {}
+class HttpError extends Error {}
+HttpError.prototype.name = HttpError.name
+
+class ClientError extends HttpError {}
+ClientError.prototype.name = ClientError.name
+
+class NotFoundError extends ClientError {}
 NotFoundError.prototype.name = NotFoundError.name
 
-export class ConflictError extends Error {}
+class ConflictError extends ClientError {}
 ConflictError.prototype.name = ConflictError.name
 
-export class BadRequestError extends Error {}
+class BadRequestError extends ClientError {}
 BadRequestError.prototype.name = BadRequestError.name
 
-export class ForbiddenError extends Error {}
+class ForbiddenError extends ClientError {}
 ForbiddenError.prototype.name = ForbiddenError.name
 
-export class UnauthorizedError extends Error {}
+class UnauthorizedError extends ClientError {}
 UnauthorizedError.prototype.name = UnauthorizedError.name
+
+const isClientError = error => error instanceof ClientError
+
+export {
+  HttpError,
+  ClientError,
+  NotFoundError,
+  ConflictError,
+  BadRequestError,
+  ForbiddenError,
+  UnauthorizedError,
+  isClientError,
+}
