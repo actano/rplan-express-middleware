@@ -37,7 +37,12 @@ const getLogFn = (logLevel) => {
 const getRequestLogger = req => req[LOGGER_PROPERTY]
 
 const addRequestStatistics = (req, key, value) => {
-  req[STATISTICS_PROPERTY][key] = value
+  const statistics = req[STATISTICS_PROPERTY]
+  if (statistics == null) {
+    return
+  }
+
+  statistics[key] = value
 }
 
 const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
