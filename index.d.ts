@@ -20,6 +20,8 @@ declare namespace middleware {
 
   function getRequestLogger(req: Request): Logger
 
+  function addRequestStatistics(req: Request, key: string, value: number): void
+
   function requestIdMiddleware(): RequestHandler
 
   function getRequestId(req: Request): string

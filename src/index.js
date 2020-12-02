@@ -4,7 +4,9 @@ export {
   registerError,
 } from './expected-error-handler'
 export { unexpectedErrorHandler } from './unexpected-error-handler'
-export { loggingHandler, HANDLER_LOG_LEVEL, getRequestLogger } from './logging-handler'
+export {
+  loggingHandler, HANDLER_LOG_LEVEL, getRequestLogger, addRequestStatistics,
+} from './logging-handler'
 export { catchAsyncErrors } from './catch-async-errors'
 export { requestMetrics } from './request-metrics'
 export {

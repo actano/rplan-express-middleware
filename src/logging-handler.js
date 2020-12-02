@@ -8,6 +8,8 @@ const logger = createLogger('express-middleware')
 
 const LOGGER_PROPERTY = Symbol('logger_property')
 
+const STATISTICS_PROPERTY = Symbol('statistics_property')
+
 logger.addSerializers({
   request: requestSerializer,
   response: responseSerializer,
@@ -34,6 +36,10 @@ const getLogFn = (logLevel) => {
 
 const getRequestLogger = req => req[LOGGER_PROPERTY]
 
+const addRequestStatistics = (req, key, value) => {
+  req[STATISTICS_PROPERTY][key] = value
+}
+
 const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
   const log = getLogFn(logLevel)
 
@@ -47,7 +53,9 @@ const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
         requestId,
       })
 
-      const statistics = {}
+      request[STATISTICS_PROPERTY] = {}
+      const statistics = request[STATISTICS_PROPERTY]
+
       const startTime = process.hrtime()
       let logged = false
 
@@ -89,5 +97,6 @@ const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
 export {
   loggingHandler,
   getRequestLogger,
+  addRequestStatistics,
   HANDLER_LOG_LEVEL,
 }
