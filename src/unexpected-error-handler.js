@@ -1,6 +1,6 @@
 import * as HttpStatus from 'http-status-codes'
 import createLogger from '@rplan/logger'
-import { getRequestLogger } from './logging-handler'
+import { getRequestLogger } from './request-logger'
 
 const defaultLogger = createLogger('express-middleware')
 

@@ -8,7 +8,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from './errors'
-import { getRequestLogger } from './logging-handler'
+import { getRequestLogger } from './request-logger'
 
 const defaultLogger = createLogger('express-middleware')
 

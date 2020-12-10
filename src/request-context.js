@@ -1,5 +1,5 @@
 import { getRequestId } from './request-id'
-import { getRequestLogger } from './logging-handler'
+import { getRequestLogger } from './request-logger'
 
 class RequestClosed extends Error {}
 RequestClosed.prototype.name = RequestClosed.name

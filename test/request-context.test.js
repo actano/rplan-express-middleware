@@ -5,7 +5,7 @@ import request from 'supertest'
 import {
   catchAsyncErrors,
   initializeRequestContext, loggingHandler,
-  RequestContextBase, requestIdMiddleware,
+  RequestContextBase, requestIdMiddleware, requestLogger,
 } from '../src'
 
 describe('request context middleware', () => {
@@ -18,6 +18,7 @@ describe('request context middleware', () => {
   function runServer(handler, errorHandler, manualResolve) {
     const app = express()
     app.use(requestIdMiddleware())
+    app.use(requestLogger())
     app.use(loggingHandler())
     app.use(requestContext)
     app.get('/some-route', catchAsyncErrors(handler))

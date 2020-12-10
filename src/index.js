@@ -5,8 +5,17 @@ export {
 } from './expected-error-handler'
 export { unexpectedErrorHandler } from './unexpected-error-handler'
 export {
-  loggingHandler, HANDLER_LOG_LEVEL, getRequestLogger, addRequestStatistics,
+  loggingHandler, addRequestStatistics,
 } from './logging-handler'
+export {
+  requestLogger, getRequestLogger,
+} from './request-logger'
+export {
+  HANDLER_LOG_LEVEL,
+} from './logging-helper'
+export {
+  detectAbortedRequests,
+} from './detect-aborted-requests'
 export { catchAsyncErrors } from './catch-async-errors'
 export { requestMetrics } from './request-metrics'
 export {

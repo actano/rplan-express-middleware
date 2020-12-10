@@ -6,7 +6,7 @@ import { CaptureStdout } from './helper/capture-stdout'
 
 import {
   catchAsyncErrors, getRequestLogger, HANDLER_LOG_LEVEL,
-  loggingHandler, requestIdMiddleware,
+  loggingHandler, requestIdMiddleware, requestLogger,
 } from '../src'
 
 describe('logging-handler', () => {
@@ -14,6 +14,7 @@ describe('logging-handler', () => {
 
   function runServer(logLevel, handler) {
     const app = express()
+    app.use(requestLogger())
     app.use(loggingHandler(logLevel))
     app.get('/some-route', catchAsyncErrors(handler))
     server = app.listen()
@@ -112,6 +113,7 @@ describe('logging-handler', () => {
     it('should log the request id', async () => {
       const app = express()
       app.use(requestIdMiddleware())
+      app.use(requestLogger())
       app.use(loggingHandler(HANDLER_LOG_LEVEL.DEBUG))
       app.get('/some-route', catchAsyncErrors(async (req, res) => {
         res.status(200).json({ foo: true })
@@ -140,6 +142,7 @@ describe('logging-handler', () => {
   context('when endpoint is matched', () => {
     it('should log the endpoint information', async () => {
       const app = express()
+      app.use(requestLogger())
       app.use(loggingHandler(HANDLER_LOG_LEVEL.INFO))
       app.patch('/resource/:resourceId/subresource/:subresourceId', catchAsyncErrors(async (req, res) => {
         res.sendStatus(200)

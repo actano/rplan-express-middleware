@@ -18,6 +18,13 @@ declare namespace middleware {
 
   function loggingHandler(logLevel: HANDLER_LOG_LEVEL): RequestHandler
 
+  function detectAbortedRequests(options?: {
+    logLevel?: HANDLER_LOG_LEVEL,
+    statusCodeOnAbort?: number,
+  }): RequestHandler
+
+  function requestLogger(): RequestHandler
+
   function getRequestLogger(req: Request): Logger
 
   function addRequestStatistics(req: Request, key: string, value: number): void

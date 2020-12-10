@@ -1,40 +1,26 @@
 import createLogger from '@rplan/logger'
 
-import { requestSerializer } from './serializer/request'
-import { responseSerializer } from './serializer/response'
 import { getRequestId } from './request-id'
-
-const logger = createLogger('express-middleware')
-
-const LOGGER_PROPERTY = Symbol('logger_property')
+import { getRequestLogger } from './request-logger'
+import { bindLogger, HANDLER_LOG_LEVEL } from './logging-helper'
 
 const STATISTICS_PROPERTY = Symbol('statistics_property')
 
-logger.addSerializers({
-  request: requestSerializer,
-  response: responseSerializer,
-})
+const errorLogger = createLogger('express-middleware.logging-handler')
+let loggedError = false
 
-const HANDLER_LOG_LEVEL = {
-  TRACE: 0,
-  DEBUG: 1,
-  INFO: 2,
-}
+const noop = () => {}
 
-const getLogFn = (logLevel) => {
-  switch (logLevel) {
-    case HANDLER_LOG_LEVEL.TRACE:
-      return logger.trace.bind(logger)
-    case HANDLER_LOG_LEVEL.DEBUG:
-      return logger.debug.bind(logger)
-    case HANDLER_LOG_LEVEL.INFO:
-      return logger.info.bind(logger)
-    default:
-      return logger.debug.bind(logger)
+const getLogFn = (logger, logLevel) => {
+  if (logger == null) {
+    if (!loggedError) {
+      errorLogger.error('No request scoped logger found. Did you add the request logger middleware before the logging middleware?')
+      loggedError = true
+    }
+    return noop
   }
+  return bindLogger(logger, logLevel)
 }
-
-const getRequestLogger = req => req[LOGGER_PROPERTY]
 
 const addRequestStatistics = (req, key, value) => {
   const statistics = req[STATISTICS_PROPERTY]
@@ -45,18 +31,14 @@ const addRequestStatistics = (req, key, value) => {
   statistics[key] = value
 }
 
-const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
-  const log = getLogFn(logLevel)
-
-  return (request, response, next) => {
+const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) =>
+  (request, response, next) => {
     const { method, url } = request
     if (method !== 'HEAD') {
       const requestId = getRequestId(request)
 
-      request[LOGGER_PROPERTY] = logger.child({
-        request,
-        requestId,
-      })
+      const logger = getRequestLogger(request)
+      const log = getLogFn(logger, logLevel)
 
       request[STATISTICS_PROPERTY] = {}
       const statistics = request[STATISTICS_PROPERTY]
@@ -97,11 +79,8 @@ const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) => {
     }
     next()
   }
-}
 
 export {
   loggingHandler,
-  getRequestLogger,
   addRequestStatistics,
-  HANDLER_LOG_LEVEL,
 }
