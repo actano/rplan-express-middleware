@@ -3,6 +3,7 @@ import createLogger from '@rplan/logger'
 import { getRequestId } from './request-id'
 import { getRequestLogger } from './request-logger'
 import { bindLogger, HANDLER_LOG_LEVEL } from './logging-helper'
+import { isAbortedByClient } from './detect-aborted-requests'
 
 const STATISTICS_PROPERTY = Symbol('statistics_property')
 
@@ -60,9 +61,11 @@ const loggingHandler = (logLevel = HANDLER_LOG_LEVEL.DEBUG) =>
           endpoint = `${request.method} ${request.route.path}`
         }
 
+        const abortedByClient = isAbortedByClient(request)
+
         log(
           {
-            requestId, statistics, request, response, endpoint,
+            requestId, statistics, request, response, endpoint, abortedByClient,
           },
           'req finished: %s %s', method, url,
         )

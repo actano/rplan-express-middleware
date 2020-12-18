@@ -15,6 +15,7 @@ export {
 } from './logging-helper'
 export {
   detectAbortedRequests,
+  isAbortedByClient,
 } from './detect-aborted-requests'
 export { catchAsyncErrors } from './catch-async-errors'
 export { requestMetrics } from './request-metrics'

@@ -1,28 +1,26 @@
 import get from 'lodash/get'
-import * as HttpStatus from 'http-status-codes'
+import createLogger from '@rplan/logger'
 
 import { getRequestLogger } from './request-logger'
 import { bindLogger, HANDLER_LOG_LEVEL } from './logging-helper'
 
-const logToStdErr = (msg) => {
-  // eslint-disable-next-line no-console
-  console.error(msg)
-}
+const logger = createLogger('express-middleware.detect-aborted-requests')
+const ABORTED_BY_CLIENT_PROPERTY = Symbol('aborted_by_client')
 
 const getLogFn = (req, logLevel) => {
-  const logger = getRequestLogger(req)
-  if (logger == null) {
-    return logToStdErr
+  const requestLogger = getRequestLogger(req)
+  if (requestLogger == null) {
+    return bindLogger(logger, logLevel)
   }
-  return bindLogger(logger, logLevel)
+  return bindLogger(requestLogger, logLevel)
 }
 
 const detectAbortedRequests = (options = {}) => (req, res, next) => {
   const logLevel = get(options, 'logLevel', HANDLER_LOG_LEVEL.DEBUG)
-  const statusCodeOnAbort = get(options, 'statusCodeOnAbort', HttpStatus.BAD_REQUEST)
 
   let finished = false
   const log = getLogFn(req, logLevel)
+  req[ABORTED_BY_CLIENT_PROPERTY] = false
 
   res.on('finish', () => {
     finished = true
@@ -31,17 +29,16 @@ const detectAbortedRequests = (options = {}) => (req, res, next) => {
   res.on('close', () => {
     if (!finished) {
       log('request seems to have been aborted by the client')
-      // The request is already closed at this point but we explicitly set a status code for
-      // logging purposes and end to request to let subsequent attempts to respond fail.
-      res
-        .status(statusCodeOnAbort)
-        .end()
+      req[ABORTED_BY_CLIENT_PROPERTY] = true
     }
   })
 
   next()
 }
 
+const isAbortedByClient = req => req[ABORTED_BY_CLIENT_PROPERTY] || false
+
 export {
   detectAbortedRequests,
+  isAbortedByClient,
 }

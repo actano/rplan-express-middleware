@@ -2,10 +2,7 @@ import { expect } from 'chai'
 import express from 'express'
 import request from 'supertest'
 
-import { requestLogger } from '../src'
-import { detectAbortedRequests } from '../src/detect-aborted-requests'
-import { loggingHandler } from '../src/logging-handler'
-import { unexpectedErrorHandler } from '../src/unexpected-error-handler'
+import { detectAbortedRequests, isAbortedByClient } from '../src/detect-aborted-requests'
 
 const delayedHandler = (delay, responseBody, responseStatus) => (req, res, next) => {
   setTimeout(
@@ -29,22 +26,18 @@ const wait = delay => new Promise((resolve) => {
 describe('detecting aborted requests', () => {
   let server
 
-  function runServer(options, handler) {
+  function runServer(handler) {
     const closeProbe = (req, res, next) => {
       res.on('close', () => {
-        closeProbe.statusCode = res.statusCode
-        closeProbe.requestEnded = res.headersSent
+        closeProbe.abortedByClient = isAbortedByClient(req)
       })
       next()
     }
 
     const app = express()
-    app.use(requestLogger())
-    app.use(detectAbortedRequests(options))
+    app.use(detectAbortedRequests())
     app.use(closeProbe)
-    app.use(loggingHandler())
     app.get('/some-route', handler)
-    app.use(unexpectedErrorHandler)
     server = app.listen()
 
     return closeProbe
@@ -58,9 +51,8 @@ describe('detecting aborted requests', () => {
   })
 
   context('when request is not aborted', () => {
-    it('should respond with status from handler', async () => {
+    it('should set abortedByClient property to false', async () => {
       const closeProbe = runServer(
-        { statusCodeOnAbort: 500 },
         delayedHandler(100, { success: true }, 200),
       )
       const { port } = server.address()
@@ -70,15 +62,13 @@ describe('detecting aborted requests', () => {
       expect(res.status).to.equal(200)
       expect(res.body).to.deep.equal({ success: true })
 
-      expect(closeProbe.statusCode).to.equal(200)
-      expect(closeProbe.requestEnded).to.equal(true)
+      expect(closeProbe.abortedByClient).to.equal(false)
     })
   })
 
   context('when request is aborted', () => {
-    it('should internally set configured status code and end the request', async () => {
+    it('should set abortedByClient property to true', async () => {
       const closeProbe = runServer(
-        { statusCodeOnAbort: 500 },
         delayedHandler(100, { success: true }, 200),
       )
       const { port } = server.address()
@@ -92,8 +82,7 @@ describe('detecting aborted requests', () => {
 
       await wait(200)
 
-      expect(closeProbe.statusCode).to.equal(500)
-      expect(closeProbe.requestEnded).to.equal(true)
+      expect(closeProbe.abortedByClient).to.equal(true)
     })
   })
 })

@@ -20,8 +20,9 @@ declare namespace middleware {
 
   function detectAbortedRequests(options?: {
     logLevel?: HANDLER_LOG_LEVEL,
-    statusCodeOnAbort?: number,
   }): RequestHandler
+
+  function isAbortedByClient(req: Request): boolean
 
   function requestLogger(): RequestHandler
 
