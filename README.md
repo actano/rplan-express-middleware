@@ -7,8 +7,18 @@
 
 This is a collection of reusable express middlewares for logging and error handling
 
+A NodeJs server should at least be set up with the following middleware: 
+```javascript
+// provides the requestId (part of the req header, set by the api gateway)
+app.use(requestIdMiddleware())
+// provides a request logger configured with request and reqId
+app.use(requestLogger())
+// does request logging (needed by our security guidelines)
+app.use(loggingHandler())
+app.use(someRoute)
+```
 
-# catchAsyncErrors
+## catchAsyncErrors
 
 A middleware wrapper that catches errors of the underlying middleware 
 and pass it to the next function
@@ -25,7 +35,7 @@ and pass it to the next function
 ```
 
 
-# unexpectedErrorHandler
+## unexpectedErrorHandler
 
 This middleware sends the http status code 500 to the client, if an unexpected error occurs.
 The error is logged with the module `@rplan/logger`.
@@ -48,7 +58,7 @@ Example for adding the middleware:
 
 ```
 
-# expectedErrorHandler
+## expectedErrorHandler
 
 This middleware sends a http status code 4xx, if an expected error occurs.
 The error is logged with the module `@rplan/logger`.
@@ -71,7 +81,7 @@ Example for adding the middleware:
 
 ```
 
-## Predefined standard errors
+### Predefined standard errors
 
 There are the following standard errors defined:
 
@@ -91,7 +101,7 @@ There are the following standard errors defined:
   }))
 ```
 `
-## Custom errors
+### Custom errors
 
 With the function `registerError` custom errors can be registered together with a http status code.
 
@@ -120,7 +130,7 @@ twice.
 The message of the error is exposed to the calling client. Make sure that the error message 
 do not contain any security information, like session ids. 
 
-# loggingHandler
+## loggingHandler
 
 Add standardized logging in the same manner as in the rplan monolith. 
 
@@ -144,7 +154,7 @@ This middleware should be placed at the top and use `@rplan/logger` for logging.
 
 ```
 
-# requestMetrics
+## requestMetrics
 
 Collect metrics of requests based on the request method, path and response status code. The metrics
 are collected with `prom-client` which should be made available as a peer dependency. The middleware
