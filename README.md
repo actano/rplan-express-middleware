@@ -9,12 +9,13 @@ This is a collection of reusable express middlewares for logging and error handl
 
 A NodeJs server should at least be set up with the following middleware: 
 ```javascript
+import { requestIdMiddleware, requestLogger, loggingHandler } from '@rplan/express-middleware'
 // provides the requestId (part of the req header, set by the api gateway)
 app.use(requestIdMiddleware())
 // provides a request logger configured with request and reqId
 app.use(requestLogger())
 // does request logging (needed by our security guidelines)
-app.use(loggingHandler())
+app.use(loggingHandler(HANDLER_LOG_LEVEL.INFO))
 app.use(someRoute)
 ```
 
