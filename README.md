@@ -142,13 +142,13 @@ This middleware should be placed at the top and use `@rplan/logger` for logging.
  
 ```javascript
   import express from 'express'
-  import { loggingHandler } from '@rplan/express-middleware'
+  import { loggingHandler, HANDLER_LOG_LEVEL } from '@rplan/express-middleware'
   
   // ...
   
   const app = express()
   
-  app.use(loggingHandler)
+  app.use(loggingHandler(HANDLER_LOG_LEVEL.INFO))
   
   app.use(someRoute)
 
@@ -193,4 +193,133 @@ app.use(requestMetrics({
 app.get('/foo/:id', (req, res) => {
   // ....
 })
+```
+
+## detectAbortedRequests
+
+Detects if the client side aborted/closed the request prematurely. In case the request is detected
+as aborted it will create a corresponding log entry. Additionally, this middleware provides an API
+for checking if the request has been aborted.
+
+```javascript
+import express from 'express'
+import { 
+  detectAbortedRequests,
+  isAbortedByClient,
+  HANDLER_LOG_LEVEL,
+} from '@rplan/express-middleware'
+
+const app = express()
+
+app.use(detectAbortedRequests({
+  logLevel: HANDLER_LOG_LEVEL.INFO,
+}))
+
+app.get('/foo/:id', (req, res) => {
+  if (isAbortedByClient(req)) {
+    // do something if aborted
+  } else {
+    // ...
+  }
+})
+```
+
+## requestIdMiddleware
+
+Ensures that each request gets a unique id which can be used for correlation, e.g. to correlate all
+log entries which belong to a particular request. Takes either a client provided request id from
+the `x-request-id` header or generates a new request id.
+
+
+```javascript
+import express from 'express'
+import {
+  requestIdMiddleware,
+  getRequestId,
+  requestLogger,
+  loggingHandler,
+} from '@rplan/express-middleware'
+
+const app = express()
+app.use(requestIdMiddleware())
+app.use(requestLogger())
+app.use(loggingHandler())
+
+app.use('/foo', (req, res) => {
+  const requestId = getRequestId(res)
+  // ...
+})
+```
+
+## requestContext
+
+The `requestContext` middleware provides a convenient API for request scoped properties. The base
+version provides access to the request id and request logger (requires the corresponding middlewares)
+but the context can be extended by the consumer as needed.
+
+```javascript
+import express from 'express'
+import {
+  initializeRequestContext,
+  RequestContextBase,
+  requestIdMiddleware,
+  requestLogger,
+  loggingHandler,
+} from '@rplan/express-middleware'
+
+const {
+  requestContext,
+  getRequestContext,
+} = initializeRequestContext(req => new RequestContextBase())
+
+const app = express()
+app.use(requestIdMiddleware())
+app.use(requestLogger())
+app.use(loggingHandler())
+app.use(requestContext)
+
+app.get('/foo', (req, res) => {
+  const ctx = getRequestContext(req)
+  ctx.getLogger().info('logging via request context logger')
+  // ...
+})
+```
+
+## handleServerLifecycle
+
+Provides a convenient method for gracefully handling the whole HTTP server lifecycle from startup to
+shutdown. In particular callbacks for startup and shutdown can be provided to be notified when the
+HTTP server started listening and to run cleanup on server shutdown. Additionally it provides a
+graceful shutdown period to normally complete still running requests without accepting new requests.
+
+```javascript
+import express from 'express'
+import {
+  handleServerLifecycle,
+} from '@rplan/express-middleware'
+
+const app = express()
+
+app.get('/foo', (req, res) => {
+  // ...
+})
+
+async function main() {
+  const shutdownServer = await handleServerLifecycle(
+    app,
+    3000,
+    {
+      onStart() {
+        console.log('server started')
+      },
+      onShutdown() {
+        console.log('server shutting down')
+        // do cleanup
+      },
+    }
+  )
+  
+  // shut down server programmatically
+  setTimeout(shutdown, 10000)
+}
 ```
