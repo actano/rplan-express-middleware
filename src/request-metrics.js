@@ -1,7 +1,10 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Prometheus from 'prom-client'
+import gcStats from 'prometheus-gc-stats'
 import { pathToRegexp } from 'path-to-regexp'
 import url from 'url'
+
+const startGcStats = gcStats(Prometheus.register)
 
 let _requestCount
 const getRequestCount = () => {
@@ -62,6 +65,7 @@ function normalizeStatus(statusCode) {
 }
 
 export const requestMetricsFactory = (_getRequestCount, _getRequestDuration) => (options = {}) => {
+  startGcStats()
   const requestCount = _getRequestCount()
 
   const pathPatterns = options.pathPatterns || []
