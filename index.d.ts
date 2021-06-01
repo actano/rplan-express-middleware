@@ -103,7 +103,7 @@ declare namespace middleware {
     isClosed(): boolean
   }
 
-  function initializeRequestContext<T extends RequestContext>(createContext: (req: Request) => T): {
+  function initializeRequestContext<T extends RequestContext>(createContext: (req: Request, res: Response) => T): {
     getRequestContext(req: Request): T,
     requestContext(req: Request, res: Response, next: NextFunction): void,
     ensureRequestIsRunning(context: T): void

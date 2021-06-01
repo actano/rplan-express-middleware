@@ -39,13 +39,13 @@ const REQUEST_CONTEXT_PROP = Symbol('request_context_prop')
 function initializeRequestContext(createContext) {
   const getRequestContext = req => req[REQUEST_CONTEXT_PROP]
 
-  function initializeContext(req) {
-    return createContext(req)
+  function initializeContext(req, res) {
+    return createContext(req, res)
   }
 
   function requestContext(req, res, next) {
     if (req[REQUEST_CONTEXT_PROP] == null) {
-      req[REQUEST_CONTEXT_PROP] = initializeContext(req)
+      req[REQUEST_CONTEXT_PROP] = initializeContext(req, res)
     }
 
     next()
