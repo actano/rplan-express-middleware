@@ -1,6 +1,6 @@
 {
   "name": "@rplan/express-middleware",
-  "version": "5.2.0",
+  "version": "5.3.0",
   "author": "Actano GmbH (https://rplan.com/)",
   "license": "MIT",
   "main": "lib/index.js",
